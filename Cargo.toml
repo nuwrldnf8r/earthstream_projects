@@ -1,0 +1,5 @@
+[workspace]
+members = [
+    "src/earthstream_projects_backend"
+]
+resolver = "2"

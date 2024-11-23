@@ -1,0 +1,17 @@
+{
+  "canisters": {
+    "earthstream_projects_backend": {
+      "candid": "src/earthstream_projects_backend/earthstream_projects_backend.did",
+      "package": "earthstream_projects_backend",
+      "type": "rust"
+    }
+  },
+  "defaults": {
+    "build": {
+      "args": "",
+      "packtool": ""
+    }
+  },
+  "output_env_file": ".env",
+  "version": 1
+}
