@@ -1,3 +1,117 @@
+type ProjectStatus = variant {
+    PendingReview;
+    Approved;
+    Rejected;
+    Suspended;
+};
+
+type GatewayType = variant {
+    Wifi;
+    GSM;
+};
+
+type ProjectImages = record {
+    background: text;
+    gallery: vec text;
+};
+
+type Location = record {
+    lat: float64;
+    lng: float64;
+    address: text;
+    geohash: text;
+};
+
+type Project = record {
+    id: text;
+    name: text;
+    description: text;
+    gateway_type: GatewayType;
+    images: ProjectImages;
+    location: Location;
+    project_discord: opt text;
+    private_discord: text;
+    sensors_required: nat32;
+    video: opt text;
+    status: ProjectStatus;
+    owner: principal;
+    created_at: nat64;
+    vote_count: nat64;
+    featured: bool;
+    featured_at: opt nat64;
+    tags: vec text;
+};
+
+type ProjectData = record {
+    name: text;
+    description: text;
+    gateway_type: GatewayType;
+    images: ProjectImages;
+    location: Location;
+    project_discord: opt text;
+    private_discord: text;
+    sensors_required: nat32;
+    video: opt text;
+    tags: vec text;
+};
+
+type Vote = record {
+    voter: principal;
+    timestamp: nat64;
+};
+
+type ProjectsResponse = record {
+    projects: vec Project;
+    total: nat64;
+    page: nat32;
+    pages: nat32;
+};
+
 service : {
-    "greet": (text) -> (text) query;
-}
+    // Admin Management
+    create_super_admin: () -> (variant { Ok; Err: text });
+    add_admin: (principal) -> (variant { Ok; Err: text });
+    remove_admin: (principal) -> (variant { Ok; Err: text });
+    is_admin: (principal) -> (bool) query;
+    is_super_admin: (principal) -> (bool) query;
+
+    // Project Management
+    create_project: (ProjectData) -> (variant { Ok: text; Err: text });
+    update_project: (text, ProjectData) -> (variant { Ok; Err: text });
+    update_project_status: (text, ProjectStatus) -> (variant { Ok; Err: text });
+
+    // Featured Projects
+    feature_project: (text) -> (variant { Ok; Err: text });
+    unfeature_project: (text) -> (variant { Ok; Err: text });
+
+    // Voting System
+    vote_for_project: (text) -> (variant { Ok; Err: text });
+    remove_vote: (text) -> (variant { Ok; Err: text });
+
+    // Query Functions
+    get_project: (text) -> (opt Project) query;
+    get_projects_by_ids: (vec text, opt nat32, opt nat32) -> (ProjectsResponse) query;
+    get_projects_by_owner: (principal, opt nat32, opt nat32) -> (ProjectsResponse) query;
+    get_projects_by_date_range: (nat64, nat64, opt nat32, opt nat32) -> (ProjectsResponse) query;
+    get_projects_by_location: (float64, float64, float64) -> (vec Project) query;
+    get_projects_by_gateway_type: (GatewayType, opt nat32, opt nat32) -> (ProjectsResponse) query;
+    get_projects_by_votes: (opt nat64, opt nat64, opt nat32, opt nat32) -> (ProjectsResponse) query;
+    get_featured_projects: (opt nat32, opt nat32) -> (ProjectsResponse) query;
+    get_projects_by_tag: (text, opt nat32, opt nat32) -> (ProjectsResponse) query;
+    get_projects_by_status: (ProjectStatus, opt nat32, opt nat32) -> (ProjectsResponse) query;
+
+    // Vote Queries
+    get_project_votes: (text) -> (nat64) query;
+    get_user_vote_for_project: (text, principal) -> (bool) query;
+    get_user_voted_projects: (principal, opt nat32, opt nat32) -> (ProjectsResponse) query;
+
+    // Tag Management
+    get_all_tags: () -> (vec text) query;
+
+    // Search
+    search_projects: (text, opt nat32, opt nat32) -> (ProjectsResponse) query;
+
+    // Stats
+    get_total_projects: () -> (nat64) query;
+    get_total_votes: () -> (nat64) query;
+};
